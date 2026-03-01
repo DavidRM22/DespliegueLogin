@@ -1,0 +1,654 @@
+diff --git a/app/controllers/DashboardController.php b/app/controllers/DashboardController.php
+index f2ad92622c115c940f169f0f2c577c61f6a24ebb..16a4412829d3ab67845b28a607e918ecfc7cdc1a 100644
+--- a/app/controllers/DashboardController.php
++++ b/app/controllers/DashboardController.php
+@@ -1,32 +1,79 @@
+ <?php
+ 
+ require_once MODEL_PATH . '/UserModel.php';
+ require_once MODEL_PATH . '/AuditModel.php';
+ 
+ class DashboardController
+ {
++    private function processProfilePhotoUpload()
++    {
++        if (empty($_FILES['profile_photo']) || ($_FILES['profile_photo']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
++            return null;
++        }
++
++        $photo = $_FILES['profile_photo'];
++
++        if (($photo['error'] ?? UPLOAD_ERR_OK) !== UPLOAD_ERR_OK) {
++            $_SESSION['employee_error_message'] = 'No se pudo cargar la foto de perfil. Intente nuevamente.';
++            return null;
++        }
++
++        if (($photo['size'] ?? 0) > 2 * 1024 * 1024) {
++            $_SESSION['employee_error_message'] = 'La foto de perfil supera el tamaño máximo permitido (2 MB).';
++            return null;
++        }
++
++        $mimeType = mime_content_type($photo['tmp_name']);
++        $allowedTypes = [
++            'image/jpeg' => 'jpg',
++            'image/png' => 'png',
++            'image/webp' => 'webp',
++            'image/gif' => 'gif',
++        ];
++
++        if (!isset($allowedTypes[$mimeType])) {
++            $_SESSION['employee_error_message'] = 'Formato de imagen no válido. Use JPG, PNG, WEBP o GIF.';
++            return null;
++        }
++
++        $uploadDir = BASE_PATH . '/public/uploads/profiles';
++        if (!is_dir($uploadDir)) {
++            mkdir($uploadDir, 0775, true);
++        }
++
++        $fileName = 'profile_' . uniqid('', true) . '.' . $allowedTypes[$mimeType];
++        $destination = $uploadDir . '/' . $fileName;
++
++        if (!move_uploaded_file($photo['tmp_name'], $destination)) {
++            $_SESSION['employee_error_message'] = 'No se pudo guardar la imagen en el servidor.';
++            return null;
++        }
++
++        return 'uploads/profiles/' . $fileName;
++    }
++
+     private function enforcePasswordUpdated()
+     {
+         $email = $_SESSION['user_id'] ?? null;
+         if (!$email) {
+             return;
+         }
+ 
+         $userModel = new UserModel();
+         $user = $userModel->findByEmail($email);
+ 
+         if (!empty($user['must_change_password'])) {
+             redirect(route('auth', 'changePasswordRequired'));
+         }
+     }
+ 
+     private function generateTemporaryPassword()
+     {
+         $lower = 'abcdefghijklmnopqrstuvwxyz';
+         $upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+         $digits = '0123456789';
+         $special = '!@#$%^&*';
+ 
+         $requiredChars = [
+             $lower[random_int(0, strlen($lower) - 1)],
+             $upper[random_int(0, strlen($upper) - 1)],
+@@ -92,51 +139,58 @@ class DashboardController
+         authRequired();
+         $this->enforcePasswordUpdated();
+         require VIEW_PATH . '/add_employee.php';
+     }
+ 
+     public function saveEmployee()
+     {
+         authRequired();
+         $this->enforcePasswordUpdated();
+ 
+         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+             redirect(route('dashboard', 'index'));
+         }
+ 
+         $payload = [];
+         $payload['full_name'] = trim($_POST['full_name'] ?? '');
+         $payload['email'] = trim($_POST['email'] ?? '');
+         $payload['phone'] = trim($_POST['phone'] ?? '');
+         $payload['type'] = trim($_POST['type'] ?? '');
+         $payload['department'] = trim($_POST['department'] ?? '');
+         $payload['position'] = trim($_POST['position'] ?? '');
+         $payload['hired_at'] = trim($_POST['hired_at'] ?? '');
+         $payload['status'] = trim($_POST['status'] ?? '');
+         $payload['password'] = $this->generateTemporaryPassword();
+         $payload['must_change_password'] = true;
++        $payload['photo_url'] = $this->processProfilePhotoUpload();
+ 
+         $userModel = new UserModel();
+         $userModel->create($payload);
+ 
+-        $_SESSION['employee_temp_password_message'] = 'Empleado creado exitosamente. Contraseña temporal: ' . $payload['password'] . '. Guarde esta información.';
++        $baseMessage = 'Empleado creado exitosamente. Contraseña temporal: ' . $payload['password'] . '. Guarde esta información.';
++        if (!empty($_SESSION['employee_error_message'])) {
++            $_SESSION['employee_temp_password_message'] = $baseMessage . ' (La foto no pudo guardarse: ' . $_SESSION['employee_error_message'] . ')';
++            unset($_SESSION['employee_error_message']);
++        } else {
++            $_SESSION['employee_temp_password_message'] = $baseMessage;
++        }
+ 
+         redirect(route('dashboard', 'addEmployee'));
+     }
+ 
+     public function logout()
+     {
+         session_destroy();
+         redirect(route('auth', 'login'));
+     }
+ 
+     public function audit()
+     {
+         authRequired();
+         $this->enforcePasswordUpdated();
+ 
+         $auditModel = new AuditModel();
+         $logs = json_decode(file_get_contents(DATA_PATH . '/audit.json'), true);
+ 
+         require VIEW_PATH . '/audit.php';
+     }
+ }
+diff --git a/app/models/UserModel.php b/app/models/UserModel.php
+index 38fbfc7e8ae89e9c1f1a3710a6d58a58e9c24656..2374b2349f725a0d1a7937dced774105d8673627 100644
+--- a/app/models/UserModel.php
++++ b/app/models/UserModel.php
+@@ -11,78 +11,80 @@ class UserModel
+         $this->jsonFile = DATA_PATH . '/users.json';
+ 
+         if (!file_exists($this->jsonFile)) {
+             file_put_contents($this->jsonFile, json_encode([]));
+         }
+     }
+ 
+     public function create($data)
+     {
+         // --- GUARDAR EN JSON ---
+         $users = json_decode(file_get_contents($this->jsonFile), true);
+         $record = [];
+ 
+         $rawPassword = (string)($data['password'] ?? '');
+         $mustChangePassword = (bool)($data['must_change_password'] ?? false);
+ 
+         $record['id'] = uniqid();
+         $record['name'] = isset($data['full_name']) ? $data['full_name'] : ($data['name'] ?? '');
+         $record['email'] = $data['email'] ?? '';
+         $record['phone'] = $data['phone'] ?? '';
+         $record['type'] = $data['type'] ?? '';
+         $record['department'] = $data['department'] ?? '';
+         $record['position'] = $data['position'] ?? '';
+         $record['hired_at'] = $data['hired_at'] ?? '';
+         $record['status'] = $data['status'] ?? '';
++        $record['photo_url'] = $data['photo_url'] ?? null;
+         if ($rawPassword !== '') {
+             $record['password'] = password_hash($rawPassword, PASSWORD_DEFAULT);
+             $record['must_change_password'] = $mustChangePassword;
+         }
+         $record['created_at'] = date('Y-m-d H:i:s');
+ 
+         $users[] = $record;
+ 
+         file_put_contents($this->jsonFile, json_encode($users, JSON_PRETTY_PRINT));
+ 
+         // Intentar guardar en MySQL si la tabla existe, pero no romper si hay error
+         try {
+             $db = Database::connect();
+ 
+-            $sql = "INSERT INTO users (id, name, email, phone, type, department, position, hired_at, status, created_at)
+-                    VALUES (:id, :name, :email, :phone, :type, :department, :position, :hired_at, :status, :created_at)";
++            $sql = "INSERT INTO users (id, name, email, phone, type, department, position, hired_at, status, photo_url, created_at)
++                    VALUES (:id, :name, :email, :phone, :type, :department, :position, :hired_at, :status, :photo_url, :created_at)";
+ 
+             $stmt = $db->prepare($sql);
+             $stmt->execute([
+                 ':id' => $record['id'],
+                 ':name' => $record['name'],
+                 ':email' => $record['email'],
+                 ':phone' => $record['phone'],
+                 ':type' => $record['type'],
+                 ':department' => $record['department'],
+                 ':position' => $record['position'],
+                 ':hired_at' => $record['hired_at'],
+                 ':status' => $record['status'],
++                ':photo_url' => $record['photo_url'],
+                 ':created_at' => $record['created_at']
+             ]);
+         } catch (Exception $e) {
+             // registrar error en auditoría o ignorar para no romper flujo
+         }
+     }
+ 
+     public function findByEmail($email)
+     {
+         $users = json_decode(file_get_contents($this->jsonFile), true);
+ 
+         foreach ($users as $user) {
+             if ($user['email'] === $email) {
+                 return $user;
+             }
+         }
+ 
+         return null;
+     }
+ 
+     public function updatePasswordByEmail($email, $newPassword)
+     {
+         $users = json_decode(file_get_contents($this->jsonFile), true);
+         $updated = false;
+ 
+diff --git a/app/views/add_employee.php b/app/views/add_employee.php
+index aae90057fc8f30aba8d85264d97815adc625d117..d965f5477ef5e8cb8bae92429a52cf74997076b1 100644
+--- a/app/views/add_employee.php
++++ b/app/views/add_employee.php
+@@ -1,77 +1,78 @@
+ <!DOCTYPE html>
+ <html lang="es">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Agregar nuevo empleado</title>
+     <link rel="stylesheet" href="<?= asset('estilos.css') ?>">
+     <link rel="stylesheet" href="<?= asset('dashboard.css') ?>">
+     <script src="<?= asset('theme.js') ?>" defer></script>
+ </head>
+ <body class="dashboard-body">
+ <button class="theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema"></button>
+ <div class="employee-shell">
+     <section class="employee-modal">
+         <div class="employee-modal__header">
+             <h1>Agregar Nuevo Empleado</h1>
+             <a class="employee-modal__close" href="<?= route('dashboard', 'index') ?>" aria-label="Cerrar">×</a>
+         </div>
+ 
+-        <form class="employee-form" method="post" action="<?= route('dashboard', 'saveEmployee') ?>">
++        <form class="employee-form" method="post" action="<?= route('dashboard', 'saveEmployee') ?>" enctype="multipart/form-data">
+ 
+         <?php if (!empty($_SESSION['employee_temp_password_message'])): ?>
+             <div class="alert alert-success alert-inline">
+                 ✅ <?= htmlspecialchars($_SESSION['employee_temp_password_message']) ?>
+             </div>
+             <?php unset($_SESSION['employee_temp_password_message']); ?>
+         <?php endif; ?>
+ 
+             <h2>Información del Usuario</h2>
+             <div class="employee-grid employee-grid--two">
+                 <div class="field">
+                     <label for="full_name">Nombre Completo *</label>
+                     <input id="full_name" name="full_name" type="text" placeholder="Ej: Juan Pérez García" required>
+                 </div>
+ 
+                 <div class="field">
+                     <label for="email">Correo Electrónico *</label>
+                     <input id="email" name="email" type="email" placeholder="juan.perez@empresa.com" required>
+                 </div>
+ 
+                 <div class="field">
+                     <label for="phone">Teléfono</label>
+                     <input id="phone" name="phone" type="text" placeholder="+51 999 999 999">
+                 </div>
+             </div>
+ 
+             <h2>Foto de Perfil</h2>
+             <div class="photo-row">
+-                <div class="photo-placeholder">📷</div>
++                <div class="photo-placeholder" id="photoPreview" aria-label="Vista previa de foto de perfil">📷</div>
+                 <div>
+-                    <button class="btn-secondary btn-inline" type="button">Capturar Foto con Reconocimiento Facial</button>
+-                    <p>Opcional: Captura la foto del empleado con verificación biométrica</p>
++                    <label class="btn-secondary btn-inline" for="profile_photo">Seleccionar Foto</label>
++                    <input id="profile_photo" name="profile_photo" type="file" accept="image/*" class="profile-photo-input">
++                    <p>Opcional: sube una imagen real (JPG, PNG, WEBP o GIF - máx. 2 MB).</p>
+                 </div>
+             </div>
+ 
+             <h2>Información Laboral</h2>
+             <div class="employee-grid employee-grid--two">
+                 <div class="field">
+                     <label for="type">Tipo de Empleado *</label>
+                     <select id="type" name="type" required>
+                         <option>Administrador</option>
+                         <option>Instructor</option>
+                         <option>Desarrollador</option>
+                         <option>Asistente Administrativo</option>
+                     </select>
+                 </div>
+ 
+                 <div class="field">
+                     <label for="department">Departamento</label>
+                     <select id="department" name="department">
+                         <option>Seleccionar departamento</option>
+                         <option>Administracion</option>
+                         <option>Recursos Humanos</option>
+                         <option>Tecnologia de la Informacion</option>
+                         <option>Desarrollo</option>
+                         <option>Educacion</option>
+                         <option>Marketing</option>
+@@ -95,27 +96,59 @@
+                 </div>
+ 
+                 <div class="field">
+                     <label for="hired_at">Fecha de Contratación</label>
+                     <input id="hired_at" name="hired_at" type="date">
+                 </div>
+ 
+                 <div class="field">
+                     <label for="status">Estado *</label>
+                     <select id="status" name="status" required>
+                         <option>Activo</option>
+                         <option>Inactivo</option>
+                     </select>
+                 </div>
+             </div>
+ 
+             <h2>Información Profesional</h2>
+ 
+             <div class="employee-actions">
+                 <a class="btn-secondary btn-inline" href="<?= route('dashboard', 'index') ?>">Cancelar</a>
+                 <button class="btn-primary btn-inline" type="submit">Agregar Empleado</button>
+             </div>
+         </form>
+     </section>
+ </div>
++
++<script>
++(function () {
++    var input = document.getElementById('profile_photo');
++    var preview = document.getElementById('photoPreview');
++    if (!input || !preview) return;
++
++    var activeObjectUrl = null;
++
++    function resetPreview() {
++        if (activeObjectUrl) {
++            URL.revokeObjectURL(activeObjectUrl);
++            activeObjectUrl = null;
++        }
++        preview.textContent = '📷';
++        preview.classList.remove('photo-placeholder--image');
++    }
++
++    input.addEventListener('change', function (event) {
++        var file = event.target.files && event.target.files[0];
++        if (!file) {
++            resetPreview();
++            return;
++        }
++
++        resetPreview();
++        activeObjectUrl = URL.createObjectURL(file);
++        preview.innerHTML = '<img src="' + activeObjectUrl + '" alt="Vista previa de foto de perfil">';
++        preview.classList.add('photo-placeholder--image');
++    });
++})();
++</script>
+ </body>
+ </html>
+diff --git a/app/views/dashboard.php b/app/views/dashboard.php
+index 66b190bac3d852c30662e51048117aa45ba28d89..f41b206b181e3ad6222c0262fbcf3e41c25b222e 100644
+--- a/app/views/dashboard.php
++++ b/app/views/dashboard.php
+@@ -119,57 +119,76 @@ $activeView = in_array($view, ['table', 'gallery'], true) ? $view : 'table';
+                     type="search"
+                     name="search"
+                     value="<?= htmlspecialchars($_GET['search'] ?? '') ?>"
+                     placeholder="Buscar por nombre, email o puesto..."
+                     aria-label="Buscar personal">
+ 
+                 <select name="type" aria-label="Filtrar por tipo" onchange="this.form.submit()">
+                     <option value="" <?= (isset($_GET['type']) && $_GET['type'] === '') || !isset($_GET['type']) ? 'selected' : '' ?>>Todos los tipos</option>
+                     <option value="Instructor" <?= (isset($_GET['type']) && $_GET['type'] === 'Instructor') ? 'selected' : '' ?>>Instructor</option>
+                     <option value="Desarrollador" <?= (isset($_GET['type']) && $_GET['type'] === 'Desarrollador') ? 'selected' : '' ?>>Desarrollador</option>
+                     <option value="Administrador" <?= (isset($_GET['type']) && $_GET['type'] === 'Administrador') ? 'selected' : '' ?>>Administrador</option>
+                     <option value="Asistente Administrativo" <?= (isset($_GET['type']) && $_GET['type'] === 'Asistente Administrativo') ? 'selected' : '' ?>>Asistente Administrativo</option>
+                 </select>
+ 
+                 <select name="status" aria-label="Filtrar por estado" onchange="this.form.submit()">
+                     <option value="" <?= (isset($_GET['status']) && $_GET['status'] === '') || !isset($_GET['status']) ? 'selected' : '' ?>>Todos los estados</option>
+                     <option value="Activo" <?= (isset($_GET['status']) && $_GET['status'] === 'Activo') ? 'selected' : '' ?>>Activo</option>
+                     <option value="Inactivo" <?= (isset($_GET['status']) && $_GET['status'] === 'Inactivo') ? 'selected' : '' ?>>Inactivo</option>
+                 </select>
+ 
+                 <button class="btn-secondary" type="submit">Aplicar</button>
+             </form>
+ 
+             <?php if ($activeView === 'gallery'): ?>
+                 <div class="gallery-grid">
+-                    <article class="profile-card">
+-                        <div class="avatar"><?= strtoupper(substr($user['name'], 0, 1)) ?></div>
+-                        <h4><?= $user['name'] ?></h4>
+-                        <span class="role-chip">Instructor</span>
+-                        <p><?= $user['email'] ?></p>
+-                        <small>Registrado: <?= $user['created_at'] ?></small>
+-                    </article>
++                    <?php
++                    $galleryRows = $allUsers ?? [];
++                    if (empty($galleryRows)) {
++                        $galleryRows = isset($user) ? [$user] : [];
++                    }
++                    ?>
++                    <?php foreach ($galleryRows as $u): ?>
++                        <?php
++                        $name = trim($u['name'] ?? '');
++                        $initial = strtoupper(substr($name !== '' ? $name : 'N', 0, 1));
++                        $photoUrl = trim($u['photo_url'] ?? '');
++                        ?>
++                        <article class="profile-card">
++                            <?php if ($photoUrl !== ''): ?>
++                                <div class="avatar avatar--image">
++                                    <img src="<?= asset($photoUrl) ?>" alt="Foto de <?= htmlspecialchars($name) ?>">
++                                </div>
++                            <?php else: ?>
++                                <div class="avatar"><?= htmlspecialchars($initial) ?></div>
++                            <?php endif; ?>
++                            <h4><?= htmlspecialchars($name) ?></h4>
++                            <span class="role-chip"><?= htmlspecialchars($u['type'] ?? 'Sin tipo') ?></span>
++                            <p><?= htmlspecialchars($u['email'] ?? '') ?></p>
++                            <small>Registrado: <?= htmlspecialchars($u['created_at'] ?? '-') ?></small>
++                        </article>
++                    <?php endforeach; ?>
+                 </div>
+             <?php else: ?>
+                 <div class="table-wrap table-wrap--dashboard">
+                     <table class="audit-table dashboard-table">
+                         <thead>
+                         <tr>
+                             <th>Nombre</th>
+                             <th>Email</th>
+                             <th>Tipo</th>
+                             <th>Puesto</th>
+                             <th>Departamento</th>
+                             <th>Estado</th>
+                             <th>Acciones</th>
+                         </tr>
+                         </thead>
+                         <tbody>
+                         <?php
+                         $rows = $allUsers ?? [];
+                         if (empty($rows)) :
+                             // fallback a mostrar usuario actual
+                             $rows = isset($user) ? [$user] : [];
+                         endif;
+ 
+                         foreach ($rows as $u) :
+                             ?>
+diff --git a/public/dashboard.css b/public/dashboard.css
+index 2773a46ff6c8bc37666207b7739a062c616693ed..f0cf84eadd6033fab1e59643c48c29ff11b0540d 100644
+--- a/public/dashboard.css
++++ b/public/dashboard.css
+@@ -87,80 +87,101 @@
+ 
+ .stat-value {
+     margin: 10px 0 4px;
+     font-size: 2rem;
+     font-weight: 700;
+ }
+ 
+ .stat-card small {
+     color: #96abd3;
+ }
+ 
+ .media-tabs {
+     margin-top: 18px;
+ }
+ 
+ .filter-row {
+     margin-top: 14px;
+     display: grid;
+     grid-template-columns: 2fr 1fr 1fr;
+     gap: 10px;
+ }
+ 
+ .gallery-grid {
+     margin-top: 16px;
+     min-height: 220px;
++    max-height: 420px;
+     border: 1px solid rgba(126, 151, 223, 0.28);
+     border-radius: 14px;
+     padding: 14px;
+-    display: flex;
+-    align-items: flex-start;
++    display: grid;
++    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
++    align-content: start;
++    gap: 12px;
++    overflow-y: auto;
++    overflow-x: hidden;
+     background: rgba(12, 24, 45, 0.38);
+ }
+ 
+ .profile-card {
+-    width: 170px;
++    width: 100%;
++    max-width: 170px;
+     text-align: center;
+     background: rgba(20, 34, 60, 0.7);
+     border: 1px solid rgba(130, 157, 242, 0.22);
+     border-radius: 12px;
+     padding: 14px;
++    justify-self: center;
+ }
+ 
+ .avatar {
+     width: 64px;
+     height: 64px;
+     border-radius: 50%;
+     margin: 0 auto 10px;
+     display: grid;
+     place-items: center;
+     font-size: 1.5rem;
+     font-weight: 700;
+     color: #1f4f8b;
+     background: #b9d6ea;
+ }
+ 
++
++
++.avatar--image {
++    overflow: hidden;
++    background: #d9e7f6;
++}
++
++.avatar--image img {
++    width: 100%;
++    height: 100%;
++    object-fit: cover;
++    border-radius: 50%;
++}
++
+ .profile-card h4 {
+     margin: 4px 0;
+ }
+ 
+ .role-chip {
+     display: inline-block;
+     border-radius: 999px;
+     padding: 4px 10px;
+     font-size: 0.75rem;
+     font-weight: 700;
+     background: rgba(87, 151, 255, 0.2);
+     border: 1px solid rgba(97, 158, 255, 0.35);
+     color: #9cccff;
+ }
+ 
+ .profile-card p,
+ .profile-card small {
+     display: block;
+     margin-top: 8px;
+     color: #9cb1d8;
+     word-break: break-word;
+ }
+ 
+ 
+ /* Dashboard RRHH full-screen */
+@@ -350,55 +371,76 @@
+     background: #f7f9fd;
+     border-color: #d2dcea;
+     color: #4f5b69;
+ }
+ 
+ .employee-grid {
+     display: grid;
+     gap: 14px;
+ }
+ 
+ .employee-grid--two {
+     grid-template-columns: repeat(2, minmax(0, 1fr));
+ }
+ 
+ .photo-row {
+     display: flex;
+     align-items: center;
+     gap: 14px;
+ }
+ 
+ .photo-placeholder {
+     width: 90px;
+     height: 90px;
+     border-radius: 50%;
+     border: 2px solid #bfd0e4;
+-    display: grid;
+-    place-items: center;
++    display: flex;
++    align-items: center;
++    justify-content: center;
+     font-size: 1.9rem;
+     color: #8098b2;
+     background: #eef4fb;
++    overflow: hidden;
++}
++
++
++
++.profile-photo-input {
++    display: none;
++}
++
++.photo-placeholder--image {
++    overflow: hidden;
++    padding: 0;
++}
++
++.photo-placeholder--image img {
++    width: 100%;
++    height: 100%;
++    object-fit: cover;
++    border-radius: 50%;
++    display: block;
+ }
+ 
+ .photo-row p {
+     margin: 8px 0 0;
+     color: #6f7f93;
+ }
+ 
+ .employee-actions {
+     margin-top: 22px;
+     display: flex;
+     justify-content: flex-end;
+     gap: 10px;
+ }
+ 
+ .employee-actions .btn-secondary {
+     background: #eaf1fa;
+     border-color: #b6c9e4;
+     color: #3e7fba;
+ }
+ 
+ .employee-actions .btn-primary {
+     box-shadow: none;
+ }
+ 
+ @media (max-width: 780px) {

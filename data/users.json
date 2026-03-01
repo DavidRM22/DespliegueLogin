@@ -1,0 +1,369 @@
+[
+    {
+        "name": "sol",
+        "email": "sol@test.com",
+        "password": "123456",
+        "id": "6995e4fe51afa",
+        "created_at": "2026-02-18 11:12:46",
+        "phone": "987654321",
+        "type": "Administrador",
+        "department": "Administracion",
+        "position": "Coordinador de Contenidos",
+        "hired_at": "2026-02-25",
+        "status": "Inactivo"
+    },
+    {
+        "name": "Test",
+        "email": "test@test.com",
+        "password": "123456",
+        "id": "6995e699c579a",
+        "created_at": "2026-02-18 11:19:37"
+    },
+    {
+        "name": "Test",
+        "email": "test@test.com",
+        "password": "123456",
+        "id": "6995e69bc662e",
+        "created_at": "2026-02-18 11:19:39"
+    },
+    {
+        "name": "Test",
+        "email": "test@test.com",
+        "password": "123456",
+        "id": "6995e69c4d7a0",
+        "created_at": "2026-02-18 11:19:40"
+    },
+    {
+        "name": "david",
+        "email": "askdjs@gmail.com",
+        "password": "$2y$10$sxPUgOoip14etCu6czPTT.OuWqHJRwDnRc8nntzsGKljHaSDJWZ6i",
+        "id": "6995e844c750f",
+        "created_at": "2026-02-18 11:26:44"
+    },
+    {
+        "name": "david",
+        "email": "a11skdjs@gmail.com",
+        "password": "$2y$10$8Ss9uJWWqEYJOO0CDHw.oOtL1O3CGKGvWHPi1uJCh3TvOQF66vdQ2",
+        "id": "6995e97fae21c",
+        "created_at": "2026-02-18 11:31:59"
+    },
+    {
+        "name": "david",
+        "email": "a22skdjs@gmail.com",
+        "password": "$2y$10$QrDaMo6s2oiIKRmuMBA\/weugGnnis0nBNL8VlAugvxvvEc2ep4BLW",
+        "id": "6995e9c933957",
+        "created_at": "2026-02-18 11:33:13"
+    },
+    {
+        "name": "luis",
+        "email": "luis@gmail.com",
+        "password": "$2y$10$KjRVjPirc8MC6lzzqtC4ue6EnBOc0.IWiIiwX9rRAtUa\/KeVj2C2a",
+        "id": "6995ed6e9adbe",
+        "created_at": "2026-02-18 11:48:46"
+    },
+    {
+        "name": "jenan",
+        "email": "gomezsanjean@gmail.com",
+        "password": "$2y$10$2MT5.g6eqMgoKDAB9I6cIOJqkX1aoD0tlnQhgUr2DowaR5Iy3.CXm",
+        "id": "6995f7e1b2cc6",
+        "created_at": "2026-02-18 12:33:21"
+    },
+    {
+        "name": "jkhsderjh",
+        "email": "uerierh@gmail.com",
+        "password": "$2y$10$4sRh10Q2gCUMimWL2fKnfeav52nHh3uQQvMnE7h5CfWiY\/ol\/9rc2",
+        "id": "6995f9b7d2311",
+        "created_at": "2026-02-18 12:41:11"
+    },
+    {
+        "name": "juan",
+        "email": "juan@gmail.com",
+        "password": "$2y$10$\/l9mJyLjUTHZdncMLV1Gt.do2utWhlt5EGvKzeZcow792bXT\/ne12",
+        "id": "699e43df7c058",
+        "created_at": "2026-02-24 19:35:43"
+    },
+    {
+        "name": "jhoan",
+        "email": "jhoan@gmail.com",
+        "password": "$2y$10$dGD4faheP1eKXalLYpoM3uo.1GiXNhYkJcUjIBj\/kHIucUneFmWkG",
+        "id": "699e4e2ae3b62",
+        "created_at": "2026-02-24 20:19:38"
+    },
+    {
+        "name": "lenin",
+        "email": "lenin@gmail.com",
+        "password": "$2y$10$d9PBIJLv1k8ONj8\/ZW.Z0ezLeyQl4qNTPOLs8I.xB0VlN.B1mmtB6",
+        "id": "699e4ebddb4b4",
+        "created_at": "2026-02-24 20:22:05"
+    },
+    {
+        "name": "jhe",
+        "email": "jhe@gmail.com",
+        "password": "$2y$10$3R0zNoATGniQcGk8V26nxeCZOjTRdgfBToTpFrv9DdzW.8lgX0Cya",
+        "id": "699e52a366f88",
+        "created_at": "2026-02-24 20:38:43"
+    },
+    {
+        "name": "jhe",
+        "email": "jhe@gmail.com",
+        "password": "$2y$10$T770rNdC1WpUD69gS4nh2egmLMP1b1GOj812Vbw6OhMgwVk\/hMBiu",
+        "id": "699e52a5ab529",
+        "created_at": "2026-02-24 20:38:45"
+    },
+    {
+        "name": "juan12",
+        "email": "juan12@gmail.com",
+        "password": "$2y$10$TM8xIeJ29KQciUjsP7OwE.7sodK6Vvr5v8NFBodaV0sH2vLlYUk8i",
+        "id": "699e5a4003d9e",
+        "created_at": "2026-02-24 21:11:12"
+    },
+    {
+        "name": "david",
+        "email": "ramirezmelgardavid@gmail.com",
+        "password": "$2y$10$NSm8nbnHhsrWVUcrS3VusOtmvwnLNaVyrJPoTrYXjDaZ7NEVWvHee",
+        "id": "699e5da2be2a9",
+        "created_at": "2026-02-24 21:25:38"
+    },
+    {
+        "name": "sol",
+        "email": "sol123@hotmail.com",
+        "password": "$2y$10$ZyiYgToRJ2yfUi1tXhy5Fe8lKHzwiBF2LMW05txdWT5t05JOglpDq",
+        "id": "699eff3e8418d",
+        "created_at": "2026-02-25 08:55:10",
+        "phone": "987654321",
+        "type": "Administrador",
+        "department": "Finanzas",
+        "position": "Coordinador de Contenidos",
+        "hired_at": "2026-02-27",
+        "status": "Activo"
+    },
+    {
+        "id": "69a1425d1dd8a",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Desarrollador",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Junior",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:06:05"
+    },
+    {
+        "id": "69a1427042909",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Desarrollador",
+        "department": "Seleccionar departamento",
+        "position": "Instructor Junior",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:06:24"
+    },
+    {
+        "id": "69a142bb4c1d2",
+        "name": "lsdflf",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Desarrollador",
+        "department": "Educacion",
+        "position": "Especialista en Formacion",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:07:39"
+    },
+    {
+        "id": "69a143ace998f",
+        "name": "lsdflf",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Desarrollador",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Junior",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:11:40"
+    },
+    {
+        "id": "69a144304ffd3",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Administrador",
+        "department": "Recursos Humanos",
+        "position": "Especialista en Formacion",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:13:52"
+    },
+    {
+        "id": "69a1443cdd137",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Instructor",
+        "department": "Seleccionar departamento",
+        "position": "Coordinador de Contenidos",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:14:04"
+    },
+    {
+        "id": "69a1444b67715",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Asistente Administrativo",
+        "department": "Educacion",
+        "position": "Especialista en Formacion",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:14:19"
+    },
+    {
+        "id": "69a144905572f",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Instructor",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Senior",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:15:28"
+    },
+    {
+        "id": "69a144e3252e8",
+        "name": "jeans",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Asistente Administrativo",
+        "department": "Educacion",
+        "position": "Seleccionar puesto",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:16:51"
+    },
+    {
+        "id": "69a14abfd98a8",
+        "name": "jexn",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Desarrollador",
+        "department": "Operaciones",
+        "position": "Instructor Junior",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:41:51"
+    },
+    {
+        "id": "69a14c7a603e3",
+        "name": "jexn",
+        "email": "gomezsanjean@gmail.com",
+        "phone": "941388698",
+        "type": "Asistente Administrativo",
+        "department": "Recursos Humanos",
+        "position": "Especialista en Formacion",
+        "hired_at": "2026-02-25",
+        "status": "Activo",
+        "created_at": "2026-02-27 02:49:14"
+    },
+    {
+        "id": "69a22d24b727d",
+        "name": "juan",
+        "email": "pruebascooler@gmail.com",
+        "phone": "912345678",
+        "type": "Desarrollador",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Senior",
+        "hired_at": "2026-02-27",
+        "status": "Activo",
+        "created_at": "2026-02-27 18:47:48"
+    },
+    {
+        "id": "69a232be631cb",
+        "name": "jeaa",
+        "email": "pruebasperu3.2@gmail.com",
+        "phone": "912345678",
+        "type": "Administrador",
+        "department": "Seleccionar departamento",
+        "position": "Seleccionar puesto",
+        "hired_at": "",
+        "status": "Activo",
+        "created_at": "2026-02-27 19:11:42"
+    },
+    {
+        "id": "69a23444f2d68",
+        "name": "sadasd",
+        "email": "1234@gmail.com",
+        "phone": "912345678",
+        "type": "Administrador",
+        "department": "Seleccionar departamento",
+        "position": "Seleccionar puesto",
+        "hired_at": "",
+        "status": "Activo",
+        "password": "$2y$10$qSmliqob1vhtNrmIUnronuKKFb9h6T4bGlmFmbrRu32AGPNxvIXqG",
+        "must_change_password": false,
+        "created_at": "2026-02-27 19:18:13"
+    },
+    {
+        "id": "69a240fb803bf",
+        "name": "ram",
+        "email": "ram@gmail.com",
+        "phone": "987654321",
+        "type": "Administrador",
+        "department": "Seleccionar departamento",
+        "position": "Coordinador de Contenidos",
+        "hired_at": "",
+        "status": "Inactivo",
+        "password": "$2y$10$CE0K8BMI\/xNFX7WbPaxKZONl3VlYVWYh822q2LmNm8XCzSDcFYEQO",
+        "must_change_password": true,
+        "created_at": "2026-02-27 20:12:27"
+    },
+    {
+        "id": "69a24a74a9537",
+        "name": "dulche",
+        "email": "dulche@gmail.com",
+        "phone": "987654321",
+        "type": "Administrador",
+        "department": "Seleccionar departamento",
+        "position": "Seleccionar puesto",
+        "hired_at": "",
+        "status": "Activo",
+        "photo_url": "uploads\/profiles\/profile_69a24a74a92545.65320143.png",
+        "password": "$2y$10$\/kGq8cTHoxEGtvNcV2bZTOfeyDe\/88zE0wFGXLYt.fjwzWCpQGpOW",
+        "must_change_password": true,
+        "created_at": "2026-02-27 20:52:52"
+    },
+    {
+        "id": "69a24b8645201",
+        "name": "pacman",
+        "email": "pacman@gmail.com",
+        "phone": "987654321",
+        "type": "Desarrollador",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Junior",
+        "hired_at": "",
+        "status": "Activo",
+        "photo_url": "uploads\/profiles\/profile_69a24b8644d084.25839446.png",
+        "password": "$2y$10$vFf\/aaUefbEnz6RTi..Ki.iQRuPrW6Dy6Apd8gHTZ\/5IGWORpWBwG",
+        "must_change_password": false,
+        "created_at": "2026-02-27 20:57:26"
+    },
+    {
+        "id": "69a2561595417",
+        "name": "Nagi Seishiro",
+        "email": "seishironagi@gmail.com",
+        "phone": "963852741",
+        "type": "Desarrollador",
+        "department": "Tecnologia de la Informacion",
+        "position": "Instructor Junior",
+        "hired_at": "2026-02-27",
+        "status": "Activo",
+        "photo_url": "uploads\/profiles\/profile_69a2561594c740.36627592.jpg",
+        "password": "$2y$10$38zLudpU85w3m1JLa9Tvs.yyyZehp5vmkMoa4\/vaa4wNX53JEV4p2",
+        "must_change_password": true,
+        "created_at": "2026-02-27 21:42:29"
+    }
+]
