@@ -109,8 +109,6 @@
                 </div>
             </div>
 
-            <h2>Información Profesional</h2>
-
             <div class="employee-actions">
                 <a class="btn-secondary btn-inline" href="<?= route('dashboard', 'index') ?>">Cancelar</a>
                 <button class="btn-primary btn-inline" type="submit">Agregar Empleado</button>
