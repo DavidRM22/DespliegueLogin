@@ -2,3 +2,4 @@
 .gitignore
 codex.patch
 data
+docker-compose.yml

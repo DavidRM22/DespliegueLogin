@@ -1,0 +1,7 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000" # Cambia según tu app
+    env_file:
+      - .env # Aquí Docker lee tus credenciales
